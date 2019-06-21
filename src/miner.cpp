@@ -104,6 +104,11 @@ void UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, 
     if (consensusParams.nPowAllowMinDifficultyBlocksAfterHeight != boost::none) {
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
     }
+
+    // Updating time can change work required on Ycash mainnet:
+    if (consensusParams.scaledDifficultyAtYcashFork) {
+        pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
+    }
 }
 
 CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn)
@@ -747,9 +752,11 @@ void static BitcoinMiner(const CChainParams& chainparams)
                 // Update nNonce and nTime
                 pblock->nNonce = ArithToUint256(UintToArith256(pblock->nNonce) + 1);
                 UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-                if (chainparams.GetConsensus().nPowAllowMinDifficultyBlocksAfterHeight != boost::none)
+                if (chainparams.GetConsensus().nPowAllowMinDifficultyBlocksAfterHeight != boost::none ||
+                    chainparams.GetConsensus().scaledDifficultyAtYcashFork)
                 {
-                    // Changing pblock->nTime can change work required on testnet:
+                    // Changing pblock->nTime can change work required on testnet and on Ycash
+                    // mainnet at the Fork block.
                     hashTarget.SetCompact(pblock->nBits);
                 }
             }
