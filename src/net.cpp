@@ -9,7 +9,7 @@
 
 #include "main.h"
 #include "net.h"
-
+#include "consensus/consensus.h"
 #include "addrman.h"
 #include "chainparams.h"
 #include "clientversion.h"
@@ -1863,6 +1863,13 @@ void RelayTransaction(const CTransaction& tx)
 
 void RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 {
+    // Prevent realying transactions that are really big, because this may be a spam 
+    // attack.
+    int maxRelaySize = GetArg("-maxtxrelaysize", MAX_TX_RELAY_SIZE);
+    if (ss.size() > MAX_TX_RELAY_SIZE) {
+        return;
+    }
+
     CInv inv(MSG_TX, tx.GetHash());
     {
         LOCK(cs_mapRelay);
