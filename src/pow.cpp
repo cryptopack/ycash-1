@@ -78,22 +78,22 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     if (params.scaledDifficultyAtYcashFork && nHeight >= params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight && 
             nHeight <= params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight + params.nPowAveragingWindow) {
         
-        if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + 3 * 60 /*params.nPowTargetSpacing * 12*/) {
+        if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 4) {
             // If > 30 mins, allow min difficulty
             unsigned int difficulty = nProofOfWorkLimit;
             arith_uint256 target;
             target.SetCompact(difficulty);
             LogPrintf("Returning level 1 difficulty: %s\n", target.GetHex());
             return difficulty;
-        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + 2 * 60 /*params.nPowTargetSpacing * 6*/) {
+        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 3) {
             // If > 15 mins, allow low estimate difficulty
             unsigned int difficulty = IncreaseDifficultyBy(nProofOfWorkLimit, 100, params);
             arith_uint256 target;
             target.SetCompact(difficulty);
             LogPrintf("Returning level 2 difficulty: %s\n", target.GetHex());
             return difficulty;
-        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + 1 * 60 /*params.nPowTargetSpacing * 6*/) {
-            // If > 5 mins, allow low estimate difficulty
+        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 1) {
+            // If > 5 mins, allow high estimate difficulty
             unsigned int difficulty = IncreaseDifficultyBy(nProofOfWorkLimit, 100000, params);
             arith_uint256 target;
             target.SetCompact(difficulty);
