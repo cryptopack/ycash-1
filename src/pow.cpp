@@ -5,6 +5,7 @@
 
 #include "pow.h"
 
+#include "consensus/upgrades.h"
 #include "arith_uint256.h"
 #include "chain.h"
 #include "chainparams.h"
@@ -138,11 +139,11 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
 
-    return CalculateNextWorkRequired(bnAvg, pindexLast->GetMedianTimePast(), pindexFirst->GetMedianTimePast(), params);
+    return CalculateNextWorkRequired(bnAvg, pindexLast->GetMedianTimePast(), pindexFirst->GetMedianTimePast(), nHeight, params);
 }
 
 unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
-                                       int64_t nLastBlockTime, int64_t nFirstBlockTime,
+                                       int64_t nLastBlockTime, int64_t nFirstBlockTime, int nHeight,
                                        const Consensus::Params& params)
 {
     // Limit adjustment step
@@ -158,7 +159,12 @@ unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
         nActualTimespan = params.MaxActualTimespan();
 
     // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.geneisPowLimit);
+    arith_uint256 bnPowLimit;
+    if (CurrentEpoch(nHeight, params) < Consensus::UPGRADE_YCASH) {
+        bnPowLimit = UintToArith256(params.geneisPowLimit);
+    } else {
+        bnPowLimit = UintToArith256(params.powLimit);
+    }
     arith_uint256 bnNew {bnAvg};
     bnNew /= params.AveragingWindowTimespan();
     bnNew *= nActualTimespan;

@@ -27,7 +27,7 @@ TEST(PoW, DifficultyAveraging) {
     EXPECT_EQ(CalculateNextWorkRequired(bnAvg,
                                         blocks[lastBlk].GetMedianTimePast(),
                                         blocks[firstBlk].GetMedianTimePast(),
-                                        params),
+                                        0, params),
               GetNextWorkRequired(&blocks[lastBlk], nullptr, params));
     // Result should be unchanged, modulo integer division precision loss
     arith_uint256 bnRes;
@@ -44,7 +44,7 @@ TEST(PoW, DifficultyAveraging) {
     EXPECT_EQ(CalculateNextWorkRequired(bnAvg,
                                         blocks[lastBlk].GetMedianTimePast(),
                                         blocks[firstBlk].GetMedianTimePast(),
-                                        params),
+                                        0, params),
               GetNextWorkRequired(&blocks[lastBlk], nullptr, params));
     // Result should not be unchanged
     EXPECT_NE(0x1e7fffff, GetNextWorkRequired(&blocks[lastBlk], nullptr, params));
@@ -57,7 +57,7 @@ TEST(PoW, DifficultyAveraging) {
     EXPECT_NE(CalculateNextWorkRequired(bnAvg,
                                         blocks[lastBlk].GetMedianTimePast(),
                                         blocks[firstBlk].GetMedianTimePast(),
-                                        params),
+                                        0, params),
               GetNextWorkRequired(&blocks[lastBlk], nullptr, params));
 
     // Result should be the same as if the average difficulty was used
@@ -65,7 +65,7 @@ TEST(PoW, DifficultyAveraging) {
     EXPECT_EQ(CalculateNextWorkRequired(average,
                                         blocks[lastBlk].GetMedianTimePast(),
                                         blocks[firstBlk].GetMedianTimePast(),
-                                        params),
+                                        0, params),
               GetNextWorkRequired(&blocks[lastBlk], nullptr, params));
 }
 
