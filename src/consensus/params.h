@@ -94,6 +94,7 @@ struct Params {
     NetworkUpgrade vUpgrades[MAX_NETWORK_UPGRADES];
     /** Proof of work parameters */
     uint256 powLimit;
+    uint256 geneisPowLimit;
     boost::optional<uint32_t> nPowAllowMinDifficultyBlocksAfterHeight;
     bool    minDifficultyAtYcashFork;
     bool    scaledDifficultyAtYcashFork;

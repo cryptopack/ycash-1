@@ -57,10 +57,11 @@ unsigned int IncreaseDifficultyBy(unsigned int nBits, int64_t multiplier, const 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
-
+    LogPrintf("Getting work for %d\n", pindexLast ? pindexLast->nHeight : 0);
     // Genesis block
-    if (pindexLast == NULL)
-        return nProofOfWorkLimit;
+    if (pindexLast == NULL) {
+        return UintToArith256(params.geneisPowLimit).GetCompact();
+    }
 
     int nHeight = pindexLast->nHeight + 1;
 
@@ -131,8 +132,9 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     }
 
     // Check we have enough blocks
-    if (pindexFirst == NULL)
-        return nProofOfWorkLimit;
+    if (pindexFirst == NULL) {
+        return UintToArith256(params.geneisPowLimit).GetCompact();
+    }
 
     arith_uint256 bnAvg {bnTot / params.nPowAveragingWindow};
 
@@ -156,13 +158,15 @@ unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
         nActualTimespan = params.MaxActualTimespan();
 
     // Retarget
-    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    const arith_uint256 bnPowLimit = UintToArith256(params.geneisPowLimit);
     arith_uint256 bnNew {bnAvg};
     bnNew /= params.AveragingWindowTimespan();
     bnNew *= nActualTimespan;
 
-    if (bnNew > bnPowLimit)
+    if (bnNew > bnPowLimit) {
+        LogPrintf("Returning PoW limit for block work\n");
         bnNew = bnPowLimit;
+    }        
 
     /// debug print
     LogPrint("pow", "GetNextWorkRequired RETARGET\n");
