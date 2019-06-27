@@ -77,24 +77,23 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
     // For the Ycash mainnet fork, we'll adjust the difficulty down for the first nPowAveragingWindow blocks
     // depending on how much mining power is available (proxied by how long it takes to mine a block)
-    if (params.scaledDifficultyAtYcashFork && nHeight >= params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight && 
-            nHeight <= params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight + params.nPowAveragingWindow) {
-        
-        if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 4) {
+    if (params.scaledDifficultyAtYcashFork && nHeight >= params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight &&
+        params.scaledDifficultyAtYcashFork && nHeight < params.vUpgrades[Consensus::UPGRADE_YCASH].nActivationHeight + params.nPowAveragingWindow) {
+        if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 12) {
             // If > 30 mins, allow min difficulty
             unsigned int difficulty = nProofOfWorkLimit;
             arith_uint256 target;
             target.SetCompact(difficulty);
             LogPrintf("Returning level 1 difficulty: %s\n", target.GetHex());
             return difficulty;
-        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 3) {
+        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 6) {
             // If > 15 mins, allow low estimate difficulty
             unsigned int difficulty = IncreaseDifficultyBy(nProofOfWorkLimit, 100, params);
             arith_uint256 target;
             target.SetCompact(difficulty);
             LogPrintf("Returning level 2 difficulty: %s\n", target.GetHex());
             return difficulty;
-        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 1) {
+        } else if (pblock && pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 2) {
             // If > 5 mins, allow high estimate difficulty
             unsigned int difficulty = IncreaseDifficultyBy(nProofOfWorkLimit, 100000, params);
             arith_uint256 target;
@@ -102,8 +101,7 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
             LogPrintf("Returning level 3 difficulty: %s\n", target.GetHex());
             return difficulty;
         } else {
-            // Fall through, and return the normal difficulty.
-            LogPrintf("Falling through\n");
+            // If < 5 mins, fall through and return the normal difficulty algorithm 
         }
     }
 
@@ -179,6 +177,8 @@ unsigned int CalculateNextWorkRequired(arith_uint256 bnAvg,
     LogPrint("pow", "params.AveragingWindowTimespan() = %d    nActualTimespan = %d\n", params.AveragingWindowTimespan(), nActualTimespan);
     LogPrint("pow", "Current average: %08x  %s\n", bnAvg.GetCompact(), bnAvg.ToString());
     LogPrint("pow", "After:  %08x  %s\n", bnNew.GetCompact(), bnNew.ToString());
+
+    LogPrintf("Returning normal difficulty: %s\n", bnNew.GetHex());
 
     return bnNew.GetCompact();
 }
