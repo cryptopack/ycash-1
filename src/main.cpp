@@ -2530,7 +2530,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     }
 
     // Reject a block that results in a negative shielded value pool balance.
-    if (chainparams.ZIP209Enabled()) {
+    if (chainparams.ZIP209Enabled() && !mapArgs.count("-disablezip209")) {
         // Sprout
         //
         // We can expect nChainSproutValue to be valid after the hardcoded
